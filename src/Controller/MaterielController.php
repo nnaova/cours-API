@@ -28,17 +28,52 @@ class MaterielController extends AbstractController
         ]);
     }
     #[Route('/api/materiel', name: 'app_materiel')]
-    public function getAllMateriel(Request $request,MaterielRepository $materielRepository,SerializerInterface $serializer, EntityManagerInterface $entityManagerInterface ,UrlGeneratorInterface $urlgenerator): JsonResponse
+    public function getAllMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer): JsonResponse
     {
-        $materielentry = $serializer->deserialize($request->getContent(),Materiel::class,'json');
-        $materielentry->setCreatedAt(new DateTimeImmutable());
-        $materielentry->setUpdatedAt(new DateTimeImmutable());
-        $entityManagerInterface->persist($materielentry);
-        $entityManagerInterface->flush();
-        dd("fin");
-        $jsonMateriels = $serializer->serialize($materielentry,'json');
-        $location = $urlgenerator->generate("materiel.get",["id" => $materielentry->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-
+        $materiels = $materielRepository->findAll();
+        $jsonMateriels = $serializer->serialize($materiels,'json');
         return new JsonResponse($jsonMateriels,Response::HTTP_OK,[],true);
+    }
+    #[Route('/api/materiel/{id}', name: 'app_materiel_id')]
+    public function getMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer, $id): JsonResponse
+    {
+        $materiel = $materielRepository->find($id);
+        $jsonMateriel = $serializer->serialize($materiel,'json');
+        return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
+    }
+    #[Route('api/materiel/update/{id}', name: 'app_materiel_update', methods: ['PUT','PATCH'])]
+    public function updateMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer, $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $materiel = $materielRepository->find($id);
+        $data = json_decode($request->getContent(),true);
+        empty($data['name']) ? true : $materiel->setName($data['name']);
+        empty($data['type']) ? true : $materiel->setType($data['type']);
+        empty($data['available']) ? true : $materiel->setAvailable($data['available']);
+        empty($data['status']) ? true : $materiel->setStatus($data['status']);
+        $materiel->setUpdatedAt(new DateTimeImmutable());
+        $entityManager->persist($materiel);
+        $entityManager->flush();
+        $jsonMateriel = $serializer->serialize($materiel,'json');
+        return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
+    }
+    #[Route('api/materiel/harddelete/{id}', name: 'app_materiel_delete', methods: ['DELETE'])]
+    public function deleteMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer, $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $materiel = $materielRepository->find($id);
+        $entityManager->remove($materiel);
+        $entityManager->flush();
+        $jsonMateriel = $serializer->serialize($materiel,'json');
+        return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
+    }
+    #[Route('api/materiel/delete/{id}', name: 'app_materiel_soft_delete')]
+    public function softDelete(MaterielRepository $materielRepository,SerializerInterface $serializer, $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $materiel = $materielRepository->find($id);
+        $materiel->setStatus("off");
+        $materiel->setUpdatedAt(new DateTimeImmutable());
+        $entityManager->persist($materiel);
+        $entityManager->flush();
+        $jsonMateriel = $serializer->serialize($materiel,'json');
+        return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 }
