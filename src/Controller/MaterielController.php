@@ -30,7 +30,7 @@ class MaterielController extends AbstractController
     #[Route('/api/materiel', name: 'app_materiel')]
     public function getAllMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer): JsonResponse
     {
-        $materiels = $materielRepository->findAll();
+        $materiels = $materielRepository->findBy(['status' => 'En stock']);
         $jsonMateriels = $serializer->serialize($materiels,'json');
         return new JsonResponse($jsonMateriels,Response::HTTP_OK,[],true);
     }
