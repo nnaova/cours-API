@@ -101,7 +101,7 @@ class MaterielController extends AbstractController
         $materiel->setName($data['name']);
         $materiel->setType($data['type']);
         $materiel->setAvailable($data['available']);
-        $materiel->setStatus("en stock");
+        $materiel->setStatus("En stock");
         $materiel->setCreatedAt(new DateTimeImmutable());
         $materiel->setUpdatedAt(new DateTimeImmutable());
         $entityManager->persist($materiel);

@@ -2,11 +2,12 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Materiel;
-use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
+use App\Entity\User;
 use Faker\Generator;
+use App\Entity\Materiel;
+use Doctrine\Persistence\ObjectManager;
+use Doctrine\Bundle\FixturesBundle\Fixture;
 
 class AppFixtures extends Fixture
 {
@@ -18,8 +19,12 @@ class AppFixtures extends Fixture
     }
     public function load(ObjectManager $manager): void
     { 
-        // $product = new Product();
-        // $manager->persist($product);
+        $users = [];
+        $publicuser = new User();
+        $publicuser->setUsername('public@public');
+        $publicuser->setRoles(['USER']);
+        $publicuser->setPassword();
+
 
         $materielEnties = [];
         for ($i=0; $i <= 100; $i++) { 
