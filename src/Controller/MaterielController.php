@@ -39,7 +39,8 @@ class MaterielController extends AbstractController
     #[Route('/api/materiel/{id}', name: 'app_materiel_id')]
     public function getMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer, $id): JsonResponse
     {
-        $materiel = $materielRepository->find($id) && $materielRepository->findBy(['status' => 'En stock']);
+        $materiel = $materielRepository->findBy(['status' => 'En stock']);
+        $materiel = $materielRepository->find($id);
         $jsonMateriel = $serializer->serialize($materiel,'json',['groups' => 'get_materiel']);
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
@@ -50,13 +51,11 @@ class MaterielController extends AbstractController
         $materiel = $materielRepository->find($id);
         $data = json_decode($request->getContent(),true);
         empty($data['name']) ? true : $materiel->setName($data['name']);
-        empty($data['type']) ? true : $materiel->setType($data['type']);
         empty($data['available']) ? true : $materiel->setAvailable($data['available']);
-        empty($data['status']) ? true : $materiel->setStatus($data['status']);
         $materiel->setUpdatedAt(new DateTimeImmutable());
         $entityManager->persist($materiel);
         $entityManager->flush();
-        $jsonMateriel = $serializer->serialize($materiel,'json');
+        $jsonMateriel = $serializer->serialize($materiel,'json', ['groups' => 'get_materiel']);
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
@@ -78,7 +77,7 @@ class MaterielController extends AbstractController
         $materiel->setUpdatedAt(new DateTimeImmutable());
         $entityManager->persist($materiel);
         $entityManager->flush();
-        $jsonMateriel = $serializer->serialize($materiel,'json');
+        $jsonMateriel = $serializer->serialize($materiel,'json', ['groups' => 'delete_materiel']);
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
@@ -90,7 +89,7 @@ class MaterielController extends AbstractController
         $materiel->setUpdatedAt(new DateTimeImmutable());
         $entityManager->persist($materiel);
         $entityManager->flush();
-        $jsonMateriel = $serializer->serialize($materiel,'json');
+        $jsonMateriel = $serializer->serialize($materiel,'json', ['groups' => 'delete_materiel']);
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\MaterielRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MaterielRepository::class)]
 class Materiel
@@ -12,27 +13,34 @@ class Materiel
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['get_materiel'])]
+    #[Groups(['get_materiel','add_materiel','delete_materiel'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['get_materiel'])]
+    #[Groups(['get_materiel', 'add_materiel','delete_materiel'])]
+    #[Assert\NotBlank(message: 'Le nom du matériel est obligatoire')]
+    #[assert\NotNull(message: 'Le nom du matériel est obligatoire')]
+    #[assert\Length(min: 3, minMessage: 'Le nom du matériel doit contenir au moins {{ limit }} caractères')]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(['add_materiel'])]
     private ?int $type = null;
 
     #[ORM\Column]
-    #[Groups(['get_materiel'])]
+    #[Groups(['get_materiel', 'add_materiel'])]
     private ?bool $available = null;
 
     #[ORM\Column]
+    #[Groups(['add_materiel'])]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column]
+    #[Groups(['add_materiel','delete_materiel'])]
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['add_materiel','delete_materiel'])]
     private ?string $status = null;
 
     public function getId(): ?int
