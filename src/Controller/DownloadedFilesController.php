@@ -66,4 +66,23 @@ class DownloadedFilesController extends AbstractController
         $jsonFile = $serializer->serialize($file, "json");
         return new JsonResponse($jsonFile, Response::HTTP_OK, [], true);
     }
+    #[Route('/api/file/{id}', name: 'files.delete', methods:["DELETE"])]
+    public function deleteFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
+    {
+        $file = $repository->find($id);
+        $entityManager->remove($file);
+        $entityManager->flush();
+        $jsonFile = $serializer->serialize($file, "json");
+        return new JsonResponse($jsonFile, Response::HTTP_OK, [], true);
+    }
+    #[Route('api/file/restore/{id}', name: 'files.restore', methods:["PUT"])]
+    public function restoreFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
+    {
+        $file = $repository->find($id);
+        $file->setStatus("En stock");
+        $entityManager->persist($file);
+        $entityManager->flush();
+        $jsonFile = $serializer->serialize($file, "json");
+        return new JsonResponse($jsonFile, Response::HTTP_OK, [], true);
+    }
 }
