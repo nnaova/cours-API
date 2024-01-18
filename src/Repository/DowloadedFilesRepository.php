@@ -2,27 +2,27 @@
 
 namespace App\Repository;
 
-use App\Entity\DowloadFiles;
+use App\Entity\DownloadedFiles;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<DowloadFiles>
+ * @extends ServiceEntityRepository<DownloadedFiles>
  *
- * @method DowloadFiles|null find($id, $lockMode = null, $lockVersion = null)
- * @method DowloadFiles|null findOneBy(array $criteria, array $orderBy = null)
- * @method DowloadFiles[]    findAll()
- * @method DowloadFiles[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method DownloadedFiles|null find($id, $lockMode = null, $lockVersion = null)
+ * @method DownloadedFiles|null findOneBy(array $criteria, array $orderBy = null)
+ * @method DownloadedFiles[]    findAll()
+ * @method DownloadedFiles[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class DowloadFilesRepository extends ServiceEntityRepository
+class DownloadedFilesRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, DowloadFiles::class);
+        parent::__construct($registry, DownloadedFiles::class);
     }
 
 //    /**
-//     * @return DowloadFiles[] Returns an array of DowloadFiles objects
+//     * @return DownloadedFiles[] Returns an array of DownloadedFiles objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -36,7 +36,7 @@ class DowloadFilesRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?DowloadFiles
+//    public function findOneBySomeField($value): ?DownloadedFiles
 //    {
 //        return $this->createQueryBuilder('d')
 //            ->andWhere('d.exampleField = :val')

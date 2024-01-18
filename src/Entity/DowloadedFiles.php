@@ -2,13 +2,18 @@
 
 namespace App\Entity;
 
-use App\Repository\DowloadFilesRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Filesystem\Path;
+use Symfony\Component\Filesystem\Filesystem;
+use App\Repository\DownloadedFilesRepository;
+use Doctrine\ORM\Cache\TimestampRegion;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: DowloadFilesRepository::class)]
-class DownloadFiles
+#[ORM\Entity(repositoryClass: DownloadedFilesRepository::class)]
+class DownloadedFiles
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -28,13 +33,12 @@ class DownloadFiles
     private ?string $publicpath = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $mimetype = null;
+    private ?string $mimeType = null;
 
-    private ?string $file = null;
+    private ?File $file = null;
 
     #[ORM\Column(length: 255)]
     private ?string $slug = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -52,26 +56,26 @@ class DownloadFiles
         return $this;
     }
 
-    public function getFile(): ?UploadedFile
+        public function getFile(): ?UploadedFile
     {
         return $this->file;
     }
-
+        
     public function setFile(UploadedFile $file): static
     {
         $this->file = $file;
 
         $this->setName($file->getClientOriginalName());
         $this->setRealname($file->getClientOriginalName());
-        $this->setMimetype($file->getMimeType());
+        $this->setMimeType($file->getClientMimeType());
 
-        $this->setPublicpath("./documents/picturtes");
-        $this->setRealpath("./documents/picturtes");
+        $this->setPublicpath("./documents/pictures");
+        $this->setRealpath("documents/pictures");
         $this->setSlug($this->getRealname());
         $file->move(
-            $this->getRealpath(),
-            $this->getSlug()
-        );
+           $this->getPublicPath(),
+           $this->getSlug() 
+       );
 
         return $this;
     }
@@ -80,7 +84,7 @@ class DownloadFiles
     {
         return $this->realname;
     }
-
+        
     public function setRealname(string $realname): static
     {
         $this->realname = $realname;
@@ -112,14 +116,14 @@ class DownloadFiles
         return $this;
     }
 
-    public function getMimetype(): ?string
+    public function getMimeType(): ?string
     {
-        return $this->mimetype;
+        return $this->mimeType;
     }
 
-    public function setMimetype(string $mimetype): static
+    public function setMimeType(string $mimeType): static
     {
-        $this->mimetype = $mimetype;
+        $this->mimeType = $mimeType;
 
         return $this;
     }
@@ -128,12 +132,11 @@ class DownloadFiles
     {
         return $this->slug;
     }
-
     public function setSlug(string $slug): static
     {
         $slugger = new AsciiSlugger();
         $parseslug = $slugger->slug($slug . time());
-        $this->slug = $parseslug.".".$this->getFile()->getClientOriginalExtension();
+        $this->slug = $parseslug ."." . $this->getFile()->getClientOriginalExtension();
 
         return $this;
     }

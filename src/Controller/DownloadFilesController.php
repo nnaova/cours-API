@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\DownloadFiles;
+use App\Entity\DownloadedFiles;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\DownloadFilesRepositories;
+use App\Repository\DownloadedFilesRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,37 +13,38 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class DownloadFilesController extends AbstractController
+class DownloadedFilesController extends AbstractController
 {
-    #[Route('/download/files', name: 'app_download_files')]
+    #[Route('/', name: 'app.index')]
     public function index(): void
     {
 
+        
     }
-    #[Route('/api/file', name: 'files.create', methods: ['POST'])]
-    public function createfiles(Request $request, DownloadFilesRepositories $repository, SerializerInterface $serializer, 
+     #[Route('/api/file', name: 'files.create', methods:["POST"])]
+    public function createFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, 
     EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator): JsonResponse
     {
-        $newFile = new DownloadFiles();
+        $newFile = new DownloadedFiles();
 
-        $file=$request->files->get('file');
+        $file = $request->files->get("file");
+        
+        $newFile->setFile($file);
         $entityManager->persist($newFile);
         $entityManager->flush();
 
         $realname = $newFile->getRealname();
         $realpath = $newFile->getRealpath();
         $slug = $newFile->getSlug();
-        
-        $jsonpicture = [
-            'name' => $file->getname(),
-            'realname' => $realname,
-            'realpath' => $realpath,
-            'slug' => $slug,
-            'mime' => $file->getMimeType(),
+        $jsonPicture= [
+            "id"=>$newFile->getId(),
+            "name"=>$newFile->getName(),
+            "realname"=>$realname,
+            "realpath"=>$realpath,
+            "mimetype"=>$newFile->getMimeType(),
+            "slug"=>$slug,
         ];
-
-        return new JsonResponse($jsonpicture, Response::HTTP_CREATED, [
-            'Location' => $urlGenerator->generate('files.show', ['id' => $newFile->getId()])
-        ]);
+        $location = $urlGenerator->generate("app.index",[], UrlGeneratorInterface::ABSOLUTE_URL);
+        return new JsonResponse($jsonPicture, Response::HTTP_CREATED,["Location"=> $location. $realpath . "/".$slug]);
     }
 }
