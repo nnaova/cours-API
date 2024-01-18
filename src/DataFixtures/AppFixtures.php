@@ -58,15 +58,5 @@ class AppFixtures extends Fixture
             $manager->persist($materielEntry);
             $manager->flush();
         }
-        for ($i=0 ; $i <= 10 ; $i++) {
-            $materielEntry = new Materiel();
-            $materielRef = $materielEnties[array_rand($materielEnties,1)];
-            $materielEntry->setName($materielRef->getName());
-            $materielEntry->setType($materielRef->getType());
-            $materielEntry->setAvailable($materielRef->getAvailable());
-            $materielEntry->setCreatedAt(new \DateTimeImmutable());
-            $materielEntry->setUpdatedAt(new \DateTimeImmutable());
-            $materielEntry->setStatus($materielRef->getStatus());
-        }
     }
 }
