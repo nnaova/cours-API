@@ -30,6 +30,7 @@ class DownloadedFilesController extends AbstractController
         $file = $request->files->get("file");
         
         $newFile->setFile($file);
+        $newFile->setStatus("En stock");
         $entityManager->persist($newFile);
         $entityManager->flush();
 
@@ -43,8 +44,26 @@ class DownloadedFilesController extends AbstractController
             "realpath"=>$realpath,
             "mimetype"=>$newFile->getMimeType(),
             "slug"=>$slug,
+            "status"=>$newFile->getStatus(),
         ];
         $location = $urlGenerator->generate("app.index",[], UrlGeneratorInterface::ABSOLUTE_URL);
         return new JsonResponse($jsonPicture, Response::HTTP_CREATED,["Location"=> $location. $realpath . "/".$slug]);
+    }
+    #[Route('/api/file', name: 'files.list', methods:["GET"])]
+    public function listFiles(DownloadedFilesRepository $repository, SerializerInterface $serializer): JsonResponse
+    {
+        $files = $repository->findBy(["status" => "En stock"]);
+        $jsonFiles = $serializer->serialize($files, "json");
+        return new JsonResponse($jsonFiles, Response::HTTP_OK, [], true);
+    }
+    #[Route('/api/file/{id}', name: 'files.hide', methods:["PUT"])]
+    public function hideFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
+    {
+        $file = $repository->find($id);
+        $file->setStatus("Hors stock");
+        $entityManager->persist($file);
+        $entityManager->flush();
+        $jsonFile = $serializer->serialize($file, "json");
+        return new JsonResponse($jsonFile, Response::HTTP_OK, [], true);
     }
 }

@@ -39,6 +39,10 @@ class DownloadedFiles
 
     #[ORM\Column(length: 255)]
     private ?string $slug = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $status = null;
+    
     public function getId(): ?int
     {
         return $this->id;
@@ -137,6 +141,18 @@ class DownloadedFiles
         $slugger = new AsciiSlugger();
         $parseslug = $slugger->slug($slug . time());
         $this->slug = $parseslug ."." . $this->getFile()->getClientOriginalExtension();
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }
