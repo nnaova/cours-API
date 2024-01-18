@@ -15,7 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use Symfony\Component\Serializer\SerializerInterface;
+// use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\SerializationContext;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,13 +38,15 @@ class MaterielController extends AbstractController
     public function getAllMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer, TagAwareCacheInterface $cache): JsonResponse
     {
         $materiels = $materielRepository->findBy(['status' => 'En stock']);
-        $jsonMateriels = $serializer->serialize($materiels,'json', ['groups' => 'get_materiel']);
+        $context = SerializationContext::create()->setGroups(['get_materiel']);
+        $jsonMateriels = $serializer->serialize($materiels,'json', $context);
         $idCache = "getAllMateriel";
         $jsonMateriels = $cache->get($idCache, function(ItemInterface $item) use ($materielRepository, $serializer){
             $item->tag("materielCache");
             echo 'mise en cache';
             $materielsList = $materielRepository->findBy(['status' => 'En stock']);
-            return $serializer->serialize($materielsList, 'json', ['groups' => 'get_materiel']);
+            $context = SerializationContext::create()->setGroups(['get_materiel']);
+            return $serializer->serialize($materielsList, 'json', $context);
         });
         return new JsonResponse($jsonMateriels,Response::HTTP_OK,[],true);
     }
@@ -52,7 +56,8 @@ class MaterielController extends AbstractController
     {
         $materiel = $materielRepository->findBy(['status' => 'En stock']);
         $materiel = $materielRepository->find($id);
-        $jsonMateriel = $serializer->serialize($materiel,'json',['groups' => 'get_materiel']);
+        $context = SerializationContext::create()->setGroups(['get_materiel']);
+        $jsonMateriel = $serializer->serialize($materiel,'json', $context);
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
@@ -67,7 +72,8 @@ class MaterielController extends AbstractController
         $cache->invalidateTags(["materielCache"]);
         $entityManager->persist($materiel);
         $entityManager->flush();
-        $jsonMateriel = $serializer->serialize($materiel,'json', ['groups' => 'get_materiel']);
+        $context = SerializationContext::create()->setGroups(['get_materiel']);
+        $jsonMateriel = $serializer->serialize($materiel,'json', $context);
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
@@ -91,7 +97,8 @@ class MaterielController extends AbstractController
         $cache->invalidateTags(["materielCache"]);
         $entityManager->persist($materiel);
         $entityManager->flush();
-        $jsonMateriel = $serializer->serialize($materiel,'json', ['groups' => 'delete_materiel']);
+        $context = SerializationContext::create()->setGroups(['get_materiel']);
+        $jsonMateriel = $serializer->serialize($materiel,'json', $context);
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
@@ -104,7 +111,8 @@ class MaterielController extends AbstractController
         $cache->invalidateTags(["materielCache"]);
         $entityManager->persist($materiel);
         $entityManager->flush();
-        $jsonMateriel = $serializer->serialize($materiel,'json', ['groups' => 'delete_materiel']);
+        $context = SerializationContext::create()->setGroups(['get_materiel']);
+        $jsonMateriel = $serializer->serialize($materiel,'json', $context);
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
