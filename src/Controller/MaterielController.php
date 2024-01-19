@@ -34,7 +34,7 @@ class MaterielController extends AbstractController
         ]);
     }
 
-    #[Route('/api/materiel', name: 'app_materiel', methods: ['GET'])]
+    #[Route('/api/materiel', name: 'materiel.list', methods: ['GET'])]
     public function getAllMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer, TagAwareCacheInterface $cache): JsonResponse
     {
         $materiels = $materielRepository->findBy(['status' => 'En stock']);
@@ -51,7 +51,7 @@ class MaterielController extends AbstractController
         return new JsonResponse($jsonMateriels,Response::HTTP_OK,[],true);
     }
 
-    #[Route('/api/materiel/{id}', name: 'app_materiel_id', methods: ['GET'])]
+    #[Route('/api/materiel/{id}', name: 'materiel.show', methods: ['GET'])]
     public function getMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer, $id): JsonResponse
     {
         $materiel = $materielRepository->findBy(['status' => 'En stock']);
@@ -61,7 +61,7 @@ class MaterielController extends AbstractController
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
-    #[Route('api/materiel/{id}', name: 'app_materiel_update', methods: ['PUT','PATCH'])]
+    #[Route('api/materiel/{id}', name: 'materiel.update', methods: ['PUT','PATCH'])]
     public function updateMateriel(TagAwareCacheInterface $cache, MaterielRepository $materielRepository,SerializerInterface $serializer, $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $materiel = $materielRepository->find($id);
@@ -77,7 +77,7 @@ class MaterielController extends AbstractController
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
-    #[Route('api/materiel/{id}', name: 'app_materiel_delete', methods: ['DELETE'])]
+    #[Route('api/materiel/{id}', name: 'materiel.delete', methods: ['DELETE'])]
     public function deleteMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer, $id, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache): JsonResponse
     {
         $materiel = $materielRepository->find($id);
@@ -88,7 +88,7 @@ class MaterielController extends AbstractController
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
-    #[Route('api/materiel/delete/{id}', name: 'app_materiel_soft_delete', methods: ['PUT', 'PATCH'])]
+    #[Route('api/materiel/delete/{id}', name: 'materiel.hide', methods: ['PUT', 'PATCH'])]
     public function softDelete(MaterielRepository $materielRepository,SerializerInterface $serializer, $id, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache): JsonResponse
     {
         $materiel = $materielRepository->find($id);
@@ -102,7 +102,7 @@ class MaterielController extends AbstractController
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
-    #[Route('api/materiel/restore/{id}', name: 'app_materiel_restore', methods: ['PUT', 'PATCH'])]
+    #[Route('api/materiel/restore/{id}', name: 'materiel.restore', methods: ['PUT', 'PATCH'])]
     public function restore(MaterielRepository $materielRepository,SerializerInterface $serializer, $id, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache): JsonResponse
     {
         $materiel = $materielRepository->find($id);
@@ -116,7 +116,7 @@ class MaterielController extends AbstractController
         return new JsonResponse($jsonMateriel,Response::HTTP_OK,[],true);
     }
 
-    #[Route('api/materiel/add', name: 'app_materiel_add', methods: ['POST'])]
+    #[Route('api/materiel', name: 'materiel.create', methods: ['POST'])]
     public function addMateriel(SerializerInterface $serializer, Request $request, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache): JsonResponse
     {
         $materiel = new Materiel();

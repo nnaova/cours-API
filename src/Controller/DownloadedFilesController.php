@@ -56,7 +56,27 @@ class DownloadedFilesController extends AbstractController
         $jsonFiles = $serializer->serialize($files, "json");
         return new JsonResponse($jsonFiles, Response::HTTP_OK, [], true);
     }
-    #[Route('/api/file/{id}', name: 'files.hide', methods:["PUT"])]
+    #[Route('/api/file/{id}', name: 'files.show', methods:["GET"])]
+    public function showFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, $id): JsonResponse
+    {
+        $file = $repository->find($id);
+        $jsonFile = $serializer->serialize($file, "json");
+        return new JsonResponse($jsonFile, Response::HTTP_OK, [], true);
+    }
+    #[Route('/api/file/{id}', name: 'files.update', methods:["PUT", "PATCH"])]
+    public function updateFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
+    {
+        $file = $repository->findBy(['status'=>"En stock"]);
+        $file = $repository->find($id);
+        $data = json_decode($request->getContent(), true);
+        empty($data['name']) ? true : $file->setName($data['name']);
+        empty($data['status']) ? true : $file->setStatus($data['status']);
+        $entityManager->persist($file);
+        $entityManager->flush();
+        $jsonFile = $serializer->serialize($file, "json");
+        return new JsonResponse($jsonFile, Response::HTTP_OK, [], true);
+    }
+    #[Route('/api/file/delete/{id}', name: 'files.hide', methods:["PUT", "PATCH"])]
     public function hideFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
     {
         $file = $repository->find($id);
@@ -75,7 +95,7 @@ class DownloadedFilesController extends AbstractController
         $jsonFile = $serializer->serialize($file, "json");
         return new JsonResponse($jsonFile, Response::HTTP_OK, [], true);
     }
-    #[Route('api/file/restore/{id}', name: 'files.restore', methods:["PUT"])]
+    #[Route('api/file/restore/{id}', name: 'files.restore', methods:["PUT", "PATCH"])]
     public function restoreFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
     {
         $file = $repository->find($id);
