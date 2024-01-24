@@ -22,6 +22,9 @@ use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Loader\Configurator\cache;
+use Nelmio\apiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
 class MaterielController extends AbstractController
 {
@@ -34,6 +37,22 @@ class MaterielController extends AbstractController
         ]);
     }
 
+    /**
+     * liste tous les materiels
+     * 
+     * @Route("/api/materiel", name="materiel_list", methods={"GET"})
+     * @OA\Response(
+     *    response=200,
+     *   description="Retourne la liste des materiels",
+     *  @OA\JsonContent(
+     *    type="array",
+     *  @OA\Items(ref=@Model(type=Materiel::class, groups={"get_materiel"}))
+     * )
+     * )
+     * @OA\Tag(name="Materiel")
+     * @Security(name="Bearer")
+     * 
+     */
     #[Route('/api/materiel', name: 'materiel.list', methods: ['GET'])]
     public function getAllMateriel(MaterielRepository $materielRepository,SerializerInterface $serializer, TagAwareCacheInterface $cache): JsonResponse
     {
