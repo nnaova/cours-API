@@ -4,14 +4,18 @@ namespace App\Controller;
 
 use App\Entity\DownloadedFiles;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use App\Repository\DownloadedFilesRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Loader\Configurator\cache;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class DownloadedFilesController extends AbstractController
 {
@@ -74,9 +78,17 @@ class DownloadedFilesController extends AbstractController
     #[Route('/api/file', name: 'files.list', methods:["GET"])]
     public function listFiles(DownloadedFilesRepository $repository, SerializerInterface $serializer): JsonResponse
     {
-        $files = $repository->findBy(["status" => "En stock"]);
-        $jsonFiles = $serializer->serialize($files, "json");
-        return new JsonResponse($jsonFiles, Response::HTTP_OK, [], true);
+        $cache = new FilesystemAdapter();
+
+        $files = $cache->get('files_cache', function (ItemInterface $item) use ($repository, $serializer) {
+            $item->tag('filesCache');
+            $files = $repository->findBy(["status" => "En stock"]);
+            $jsonFiles = $serializer->serialize($files, "json");
+
+            return $jsonFiles;
+        });
+
+        return new JsonResponse($files, Response::HTTP_OK, [], true);
     }
 
     /**
@@ -111,13 +123,14 @@ class DownloadedFilesController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/api/file/{id}', name: 'files.update', methods:["PUT", "PATCH"])]
-    public function updateFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
+    public function updateFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id, TagAwareCacheInterface $cache): JsonResponse
     {
         $file = $repository->findBy(['status'=>"En stock"]);
         $file = $repository->find($id);
         $data = json_decode($request->getContent(), true);
         empty($data['name']) ? true : $file->setName($data['name']);
         empty($data['status']) ? true : $file->setStatus($data['status']);
+        $cache->invalidateTags(['filesCache']);
         $entityManager->persist($file);
         $entityManager->flush();
         $jsonFile = $serializer->serialize($file, "json");
@@ -137,10 +150,11 @@ class DownloadedFilesController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/api/file/delete/{id}', name: 'files.hide', methods:["PUT", "PATCH"])]
-    public function hideFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
+    public function hideFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id, TagAwareCacheInterface $cache): JsonResponse
     {
         $file = $repository->find($id);
         $file->setStatus("Hors stock");
+        $cache->invalidateTags(['filesCache']);
         $entityManager->persist($file);
         $entityManager->flush();
         $jsonFile = $serializer->serialize($file, "json");
@@ -160,9 +174,10 @@ class DownloadedFilesController extends AbstractController
      * @return JsonResponse
      */
     #[Route('/api/file/{id}', name: 'files.delete', methods:["DELETE"])]
-    public function deleteFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
+    public function deleteFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id, TagAwareCacheInterface $cache): JsonResponse
     {
         $file = $repository->find($id);
+        $cache->invalidateTags(['filesCache']);
         $entityManager->remove($file);
         $entityManager->flush();
         $jsonFile = $serializer->serialize($file, "json");
@@ -182,10 +197,11 @@ class DownloadedFilesController extends AbstractController
      * @return JsonResponse
      */
     #[Route('api/file/restore/{id}', name: 'files.restore', methods:["PUT", "PATCH"])]
-    public function restoreFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id): JsonResponse
+    public function restoreFile(Request $request, DownloadedFilesRepository $repository, SerializerInterface $serializer, EntityManagerInterface $entityManager, $id, TagAwareCacheInterface $cache): JsonResponse
     {
         $file = $repository->find($id);
         $file->setStatus("En stock");
+        $cache->invalidateTags(['filesCache']);
         $entityManager->persist($file);
         $entityManager->flush();
         $jsonFile = $serializer->serialize($file, "json");
