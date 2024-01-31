@@ -193,7 +193,7 @@ class DownloadedFilesController extends AbstractController
      * @param DownloadedFilesRepository $repository
      * @param SerializerInterface $serializer
      * @param EntityManagerInterface $entityManager
-     * @param $id
+     * @param int $id
      * @return JsonResponse
      */
     #[Route('api/file/restore/{id}', name: 'files.restore', methods:["PUT", "PATCH"])]
